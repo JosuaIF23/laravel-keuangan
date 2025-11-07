@@ -9,7 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- 🔗 Icon --}}
-    <link rel="icon" href="/logo.png" type="image/x-icon" />
+    <link rel="icon" href="/Logo.png" type="image/x-icon" />
 
     {{-- 🧾 Judul --}}
     <title>Laravel Keuangan</title>
