@@ -12,7 +12,7 @@
     <link rel="icon" href="/logo.png" type="image/x-icon" />
 
     {{-- Judul --}}
-    <title>Laravel Todolist</title>
+    <title>Laravel Keuangan</title>
 
     {{-- Styles --}}
     @livewireStyles
