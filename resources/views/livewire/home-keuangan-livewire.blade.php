@@ -1,19 +1,24 @@
 <div class="mt-3">
     {{-- 📊 Statistik Keuangan --}}
-    <div class="card mb-3">
+    <div class="card mb-3 shadow-sm">
         <div class="card-body">
             <h5 class="mb-3">Statistik Keuangan Kamu</h5>
+
             <div wire:loading wire:target="search,filterTipe" class="text-muted mb-2">
                 <small>🔄 Memperbarui statistik...</small>
             </div>
 
-            <div id="keuanganChart" style="height: 250px;"></div>
+            {{-- 🎯 Chart Area --}}
+            <div id="keuanganChart" style="height: 300px; margin-top: 25px; margin-bottom: 20px;"></div>
+
+            {{-- Hidden inputs untuk data chart --}}
             <input type="hidden" id="keuanganChart-pemasukan" value="{{ $totalPemasukan }}">
             <input type="hidden" id="keuanganChart-pengeluaran" value="{{ $totalPengeluaran }}">
         </div>
     </div>
 
-    <div class="card">
+    {{-- 💼 Daftar Transaksi --}}
+    <div class="card shadow-sm">
         <div class="card-header d-flex align-items-center justify-content-between">
             <h3 class="m-0">Hai, {{ $auth->name }}</h3>
             <a href="{{ route('auth.logout') }}" class="btn btn-warning">Keluar</a>
@@ -46,7 +51,8 @@
                 </div>
             </div>
 
-            <table class="table table-striped">
+            {{-- 📋 Tabel Transaksi --}}
+            <table class="table table-striped align-middle">
                 <thead class="table-light">
                     <tr>
                         <th>No</th>
@@ -75,9 +81,7 @@
                             <td>{{ $k->keterangan ?: '-' }}</td>
                             <td>
                                 <a href="{{ route('app.keuangan.detail', ['id' => $k->id]) }}"
-                                    class="btn btn-sm btn-info">
-                                    Detail
-                                </a>
+                                    class="btn btn-sm btn-info">Detail</a>
                                 <button wire:click="prepareEdit({{ $k->id }})"
                                     class="btn btn-sm btn-warning">Edit</button>
                                 <button wire:click="prepareDelete({{ $k->id }})"
@@ -103,7 +107,7 @@
     @include('components.modals.keuangan.edit')
     @include('components.modals.keuangan.delete')
 
-    {{-- 📈 Chart --}}
+    {{-- 📈 Chart Script --}}
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         document.addEventListener('livewire:initialized', () => {
@@ -117,7 +121,16 @@
                 const options = {
                     chart: {
                         type: 'donut',
-                        height: 250,
+                        height: 320,
+                        offsetY: 15,
+                        dropShadow: {
+                            enabled: true,
+                            top: 2,
+                            left: 2,
+                            blur: 4,
+                            color: '#999',
+                            opacity: 0.25
+                        },
                         animations: {
                             enabled: true,
                             easing: 'easeinout',
@@ -131,12 +144,20 @@
                                 speed: 500
                             }
                         },
+                        parentHeightOffset: 0,
+                    },
+                    grid: {
+                        padding: {
+                            top: 25,
+                            bottom: 20
+                        }
                     },
                     series: [pemasukan, pengeluaran],
                     labels: ['Pemasukan', 'Pengeluaran'],
                     colors: ['#28a745', '#dc3545'],
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        fontSize: '14px'
                     },
                     dataLabels: {
                         enabled: true
@@ -147,17 +168,27 @@
                     plotOptions: {
                         pie: {
                             donut: {
+                                size: '70%',
                                 labels: {
                                     show: true,
                                     name: {
-                                        offsetY: 15
+                                        show: true,
+                                        fontSize: '15px',
+                                        offsetY: 10
                                     },
                                     value: {
-                                        offsetY: -10
+                                        show: true,
+                                        fontSize: '22px',
+                                        fontWeight: '600',
+                                        offsetY: -20, // Angka sedikit naik
+                                        formatter: (val) => 'Rp ' + Number(val).toLocaleString('id-ID')
                                     },
                                     total: {
                                         show: true,
                                         label: 'Total',
+                                        fontSize: '15px',
+                                        color: '#6c757d',
+                                        offsetY: 80, // ⬇️ Label total turun ke bawah
                                         formatter: () => 'Rp ' + total.toLocaleString('id-ID')
                                     }
                                 }
@@ -166,7 +197,7 @@
                     },
                     tooltip: {
                         y: {
-                            formatter: (val) => 'Rp ' + val.toLocaleString('id-ID')
+                            formatter: (val) => 'Rp ' + Number(val).toLocaleString('id-ID')
                         }
                     }
                 };
@@ -174,7 +205,7 @@
                 const el = document.querySelector("#keuanganChart");
                 if (!el) return;
 
-                // 🔁 kalau sudah ada chart, update aja biar smooth
+                // 🔁 Update atau render ulang dengan animasi halus
                 if (chartInstance) {
                     chartInstance.updateOptions(options);
                     chartInstance.updateSeries([pemasukan, pengeluaran]);
@@ -190,15 +221,13 @@
                 renderChart(pemasukan, pengeluaran);
             };
 
-            // 🚀 render awal
+            // 🚀 Render pertama
             refreshChart();
 
-            // 🔄 update setiap kali Livewire selesai morph DOM
+            // 🔄 Update tiap kali Livewire selesai update DOM
             Livewire.hook('morph.updated', () => {
-                setTimeout(refreshChart, 150); // delay kecil supaya nilai sudah terupdate
+                setTimeout(refreshChart, 200);
             });
         });
     </script>
-
-
 </div>
